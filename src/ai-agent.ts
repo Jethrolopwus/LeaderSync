@@ -67,7 +67,7 @@ Respond ONLY with valid JSON, no markdown:
 
     return decision;
   } catch (e: any) {
-    // Fallback heuristic if AI call fails
+  
     console.warn('[AI Agent] Claude call failed, using heuristic fallback:', e.message);
     return heuristicFallback(failureType, tipStats, attemptNumber);
   }

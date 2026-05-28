@@ -7,9 +7,9 @@ export interface TipStats {
   congestion: 'LOW' | 'NORMAL' | 'HIGH';
 }
 
-const MIN_TIP = 1_000;        // 0.000001 SOL
-const BASE_TIP = 10_000;      // 0.00001 SOL
-const HIGH_CONGESTION_TIP = 100_000; // 0.0001 SOL
+const MIN_TIP = 1_000;        
+const BASE_TIP = 10_000;      
+const HIGH_CONGESTION_TIP = 100_000; 
 
 export function computeTipStats(state: StreamState): TipStats {
   const balances = [...state.tipBalances.values()]
@@ -27,7 +27,7 @@ export function computeTipStats(state: StreamState): TipStats {
   const p75 = p(0.75);
   const p90 = p(0.9);
 
-  // Congestion: compare recent slot gaps
+  
   const recent = state.recentSlots.slice(-20);
   let congestion: TipStats['congestion'] = 'NORMAL';
   if (recent.length >= 2) {

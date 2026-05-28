@@ -143,7 +143,7 @@ export class YellowstoneClient extends EventEmitter {
     };
 
     poll();
-    this.pollInterval = setInterval(poll, 400); // ~400ms ≈ slot time
+    this.pollInterval = setInterval(poll, 400); 
   }
 
   private _handleSlot(update: SlotUpdate): void {

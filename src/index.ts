@@ -21,7 +21,7 @@ const {
 const MAX_ATTEMPTS = 5;
 const POLL_INTERVAL_MS = 2000;
 const TARGET_SUBMISSIONS = 10;
-const WINDOW_WAIT_TIMEOUT_MS = 30_000; // max wait for a Jito window
+const WINDOW_WAIT_TIMEOUT_MS = 30_000; 
 
 async function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -45,11 +45,10 @@ async function waitForJitoWindow(
     const onSlot = async () => {
       const current = yellowstone.state.currentSlot;
 
-      // Refresh schedule at epoch boundary
       const fresh = await getLeaderSchedule(connection, current);
       const nextJitoSlot = findNextJitoSlot(current, fresh.jitoSlots);
 
-      if (!nextJitoSlot) return; // no upcoming Jito slots this epoch
+      if (!nextJitoSlot) return; 
 
       if (isInSubmissionWindow(current, nextJitoSlot)) {
         clearTimeout(deadline);
@@ -60,7 +59,7 @@ async function waitForJitoWindow(
     };
 
     yellowstone.on('slot', onSlot);
-    // Check immediately in case we're already in a window
+  
     onSlot();
   });
 }
@@ -77,8 +76,6 @@ async function main() {
   const tracker = new LifecycleTracker(connection);
 
   await yellowstone.connect();
-
-  // Wait for first slot
   await new Promise<void>(resolve => {
     const onSlot = () => { yellowstone.off('slot', onSlot); resolve(); };
     yellowstone.on('slot', onSlot);
@@ -87,7 +84,6 @@ async function main() {
 
   console.log(`[Main] Current slot: ${yellowstone.state.currentSlot}`);
 
-  // Fetch initial leader schedule
   await getLeaderSchedule(connection, yellowstone.state.currentSlot);
 
   let submissionCount = 0;
@@ -136,8 +132,6 @@ async function main() {
           submittedAt: result.submittedAt,
           expectedLeaderSlot: targetLeaderSlot ?? undefined,
         });
-
-        // Poll until landed or failed, passing current slot for skip detection
         let entry: LifecycleEntry | null = null;
         for (let p = 0; p < 30; p++) {
           await sleep(POLL_INTERVAL_MS);
@@ -170,10 +164,10 @@ async function main() {
           }
 
           console.log(`[Main] 🔄 AI agent retrying with tip ${decision.newTip} lamports`);
-          // On retry, wait for the next Jito window
+         
           const retrySlot = await waitForJitoWindow(yellowstone, connection);
           if (retrySlot) {
-            // Update the tracked entry's expected slot for the retry
+            
             const retryEntry = tracker.getAll().find(e => e.bundleId === result.bundleId);
             if (retryEntry) retryEntry.expectedLeaderSlot = retrySlot;
           }

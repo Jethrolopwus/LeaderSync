@@ -33,17 +33,17 @@ export async function buildAndSendBundle(
   blockEngineUrl: string,
   currentSlot: number,
 ): Promise<BundleResult> {
-  // 1. Fresh blockhash at `confirmed` (never finalized — see README)
+ 
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
 
-  // 2. Main instruction: transfer to destination
+ 
   const transferIx = SystemProgram.transfer({
     fromPubkey: payer.publicKey,
     toPubkey: destination,
     lamports: transferLamports,
   });
 
-  // 3. Tip instruction to a random Jito tip account
+
   const tipIx = SystemProgram.transfer({
     fromPubkey: payer.publicKey,
     toPubkey: randomTipAccount(),

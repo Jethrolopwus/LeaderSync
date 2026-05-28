@@ -17,7 +17,7 @@ export interface LifecycleEntry {
   tipLamports: number;
   submittedSlot: number;
   submittedAt: number;
-  expectedLeaderSlot?: number;  // the Jito leader slot we targeted
+  expectedLeaderSlot?: number;  
   processedAt?: number;
   confirmedAt?: number;
   finalizedAt?: number;
@@ -25,9 +25,9 @@ export interface LifecycleEntry {
   confirmedSlot?: number;
   finalizedSlot?: number;
   // deltas in ms
-  processedDelta?: number;   // submittedAt → processedAt
-  confirmedDelta?: number;   // processedAt → confirmedAt
-  finalizedDelta?: number;   // confirmedAt → finalizedAt
+  processedDelta?: number;   
+  confirmedDelta?: number;   
+  finalizedDelta?: number;   
   status: 'pending' | 'landed' | 'failed';
   failureType?: FailureType;
   failureReason?: string;
@@ -67,10 +67,10 @@ export class LifecycleTracker {
       const status = statuses.value[0];
 
       if (!status) {
-        // Slot-based skip detection: 6 slots past expected leader slot
+        
         const slotSkipped = entry.expectedLeaderSlot != null && currentSlot != null
           && currentSlot > entry.expectedLeaderSlot + 6;
-        // Wall-clock fallback: 60s with no confirmation
+       
         const timedOut = Date.now() - entry.submittedAt > 60_000;
 
         if (slotSkipped || timedOut) {
@@ -152,7 +152,7 @@ export class LifecycleTracker {
       const data: LifecycleEntry[] = JSON.parse(fs.readFileSync(LOG_FILE, 'utf-8'));
       data.forEach(e => this.entries.set(e.bundleId, e));
       console.log(`[Lifecycle] Loaded ${data.length} entries from disk`);
-    } catch { /* ignore corrupt file */ }
+    } catch {  }
   }
 }
 

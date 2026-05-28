@@ -1,7 +1,5 @@
 import { Connection } from '@solana/web3.js';
 
-// Refreshed periodically from https://jito.wtf/api/validators
-// Seeded with known mainnet Jito validators as fallback.
 const FALLBACK_JITO_VALIDATORS = new Set([
   'GZctHpWXmsZC1YHACTGGcHhYxjdRqQARTHebnAXFSVbK',
   'J1to1yufRnoWn81KYg1XkTWzmKjnYSnmE2VY8BGUJ17v',
@@ -11,7 +9,7 @@ const FALLBACK_JITO_VALIDATORS = new Set([
 
 let jitoValidators = new Set(FALLBACK_JITO_VALIDATORS);
 let validatorRefreshAt = 0;
-const VALIDATOR_REFRESH_MS = 10 * 60 * 1000; // 10 min
+const VALIDATOR_REFRESH_MS = 10 * 60 * 1000; 
 
 async function refreshJitoValidators(): Promise<void> {
   if (Date.now() - validatorRefreshAt < VALIDATOR_REFRESH_MS) return;
@@ -26,14 +24,13 @@ async function refreshJitoValidators(): Promise<void> {
       console.log(`[LeaderSchedule] Refreshed ${jitoValidators.size} Jito validators`);
     }
   } catch {
-    // keep existing set on failure
+    
   }
 }
 
 export interface LeaderScheduleCache {
-  epochFirstSlot: number;   // absolute slot of epoch start
+  epochFirstSlot: number;   
   slotsPerEpoch: number;
-  // absolute Jito leader slots for this epoch, sorted ascending
   jitoSlots: number[];
   fetchedAt: number;
 }
@@ -41,7 +38,7 @@ export interface LeaderScheduleCache {
 let cache: LeaderScheduleCache | null = null;
 
 export async function getLeaderSchedule(connection: Connection, currentSlot: number): Promise<LeaderScheduleCache> {
-  // Refresh at epoch boundaries or on first call
+
   if (cache && currentSlot < cache.epochFirstSlot + cache.slotsPerEpoch) {
     return cache;
   }
@@ -51,17 +48,15 @@ export async function getLeaderSchedule(connection: Connection, currentSlot: num
   const epochInfo = await connection.getEpochInfo('confirmed');
   const epochFirstSlot = currentSlot - epochInfo.slotIndex;
 
-  // getLeaderSchedule() returns relative indices for the current epoch
   const schedule = await connection.getLeaderSchedule();
   if (!schedule) {
-    // Return stale cache or empty
+    
     return cache ?? { epochFirstSlot, slotsPerEpoch: epochInfo.slotsInEpoch, jitoSlots: [], fetchedAt: Date.now() };
   }
 
   const jitoSlots: number[] = [];
   for (const [validator, relativeSlots] of Object.entries(schedule)) {
     if (jitoValidators.has(validator)) {
-      // Convert relative indices → absolute slot numbers
       for (const rel of relativeSlots) {
         jitoSlots.push(epochFirstSlot + rel);
       }
@@ -80,17 +75,11 @@ export async function getLeaderSchedule(connection: Connection, currentSlot: num
   return cache;
 }
 
-/**
- * Returns the next Jito leader slot strictly after currentSlot, or null.
- */
+
 export function findNextJitoSlot(currentSlot: number, jitoSlots: number[]): number | null {
   return jitoSlots.find(s => s > currentSlot) ?? null;
 }
 
-/**
- * True when we're 2–4 slots before the start of a Jito leader window.
- * Each leader gets 4 consecutive slots; submit at the earliest opportunity.
- */
 export function isInSubmissionWindow(currentSlot: number, nextJitoSlot: number): boolean {
   const delta = nextJitoSlot - currentSlot;
   return delta >= 2 && delta <= 4;
